@@ -32,3 +32,10 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
+
+      - id: pytest-unit
+        name: pytest-unit
+        entry: python -m pytest tests/unit -n 8
+        language: system
+        pass_filenames: false
+        always_run: true
