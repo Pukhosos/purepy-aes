@@ -161,6 +161,10 @@ addopts = [
     "--doctest-modules",
     "--doctest-glob=*.md",
 ]
+markers = [
+    "quick: run on every commit",
+    "slow: only run at new release",
+]
 testpaths = ["."]
 norecursedirs = [
     "__pycache__",

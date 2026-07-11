@@ -35,7 +35,7 @@ repos:
 
       - id: pytest-unit
         name: pytest-unit
-        entry: python -m pytest tests/unit -n 8
+        entry: python -m pytest tests/unit -n 8 -m "quick and not slow"
         language: system
         pass_filenames: false
         always_run: true

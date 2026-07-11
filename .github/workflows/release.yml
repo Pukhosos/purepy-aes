@@ -50,10 +50,28 @@ jobs:
         run: python -m pip install --editable ".[dev, test]"
       - name: Run pre-commit hooks
         run: pre-commit run --all-files --show-diff-on-failure
+  slow-tests:
+    name: Run release-only tests
+    needs:
+      - validate
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out tagged commit
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+          cache: pip
+      - name: Install dependencies
+        run: python -m pip install --editable ".[dev, test]"
+      - name: Run slow tests
+        run: python -m pytest -n 8 -m "slow and not quick"
   build:
     name: Build distributions
     needs:
       - pre-commit
+      - slow-tests
     runs-on: ubuntu-latest
     steps:
       - name: Check out tagged commit
