@@ -1,8 +1,8 @@
-from purepython_aes.aes.padding._base import BaseGuardedPadding
+from purepython_aes.aes.padding._base import BasePadding
 from purepython_aes.const import AES_BLOCK_SIZE
 
 
-class AnsiX923Padding(BaseGuardedPadding):
+class AnsiX923Padding(BasePadding):
     """Implement deterministic ANSI X9.23 block padding."""
 
     def pad(self, data: bytes) -> bytes:

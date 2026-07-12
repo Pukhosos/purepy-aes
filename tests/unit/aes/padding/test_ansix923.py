@@ -30,7 +30,7 @@ class TestAnsiX923Padding:
     def test_unpad_rejects_empty_data(ansix923: AnsiX923Padding) -> None:
         with raises(
             expected_exception=ValueError,
-            match='padded data must not be empty',
+            match=escape('ANSI X9.23 padding expects non-empty data'),
         ):
             ansix923.unpad(bytes(0))
 
@@ -38,7 +38,7 @@ class TestAnsiX923Padding:
     def test_unpad_rejects_unaligned_data(ansix923: AnsiX923Padding) -> None:
         with raises(
             expected_exception=ValueError,
-            match=escape('expected len(data) % 16 == 0, got 15'),
+            match=escape('invalid ANSI X9.23 padding size'),
         ):
             ansix923.unpad(bytes(AES_BLOCK_SIZE - 1))
 

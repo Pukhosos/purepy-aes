@@ -1,10 +1,10 @@
 from secrets import token_bytes
 
-from purepython_aes.aes.padding._base import BaseGuardedPadding
+from purepython_aes.aes.padding._base import BasePadding
 from purepython_aes.const import AES_BLOCK_SIZE
 
 
-class Iso10126Padding(BaseGuardedPadding):
+class Iso10126Padding(BasePadding):
     """Implement legacy ISO 10126 block padding."""
 
     def pad(self, data: bytes) -> bytes:

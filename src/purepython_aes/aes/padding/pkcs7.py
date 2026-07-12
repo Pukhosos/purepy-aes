@@ -1,8 +1,8 @@
-from purepython_aes.aes.padding._base import BaseGuardedPadding
+from purepython_aes.aes.padding._base import BasePadding
 from purepython_aes.const import AES_BLOCK_SIZE
 
 
-class Pkcs7Padding(BaseGuardedPadding):
+class Pkcs7Padding(BasePadding):
     """Implement PKCS#7/CMS block padding."""
 
     def pad(self, data: bytes) -> bytes:

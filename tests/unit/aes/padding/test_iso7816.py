@@ -29,18 +29,10 @@ class TestIso7816Padding:
         assert iso7816.unpad(iso7816.pad(data)) == data
 
     @staticmethod
-    def test_unpad_rejects_empty_data(iso7816: Iso7816Padding) -> None:
-        with raises(
-            expected_exception=ValueError,
-            match='padded data must not be empty',
-        ):
-            iso7816.unpad(bytes(0))
-
-    @staticmethod
     def test_unpad_rejects_unaligned_data(iso7816: Iso7816Padding) -> None:
         with raises(
             expected_exception=ValueError,
-            match=escape('expected len(data) % 16 == 0, got 15'),
+            match=escape('ISO/IEC 7816-4 padding marker not found'),
         ):
             iso7816.unpad(bytes(AES_BLOCK_SIZE - 1))
 

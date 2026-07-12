@@ -1,12 +1,12 @@
 from typing import Final
 
-from purepython_aes.aes.padding._base import BaseGuardedPadding
+from purepython_aes.aes.padding._base import BasePadding
 from purepython_aes.const import AES_BLOCK_SIZE
 
 PADDING_START_BYTE: Final[int] = 0x80
 
 
-class Iso7816Padding(BaseGuardedPadding):
+class Iso7816Padding(BasePadding):
     """Implement ISO/IEC 7816-4 block padding."""
 
     def pad(self, data: bytes) -> bytes:
