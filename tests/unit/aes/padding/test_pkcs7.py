@@ -1,0 +1,80 @@
+from re import escape
+
+from hypothesis import given, HealthCheck, settings
+from hypothesis.strategies import binary
+from pytest import raises
+
+from purepython_aes.aes.padding import Pkcs7Padding
+from purepython_aes.const import AES_BLOCK_SIZE
+
+
+class TestPkcs7Padding:
+    @staticmethod
+    def test_pad_empty_data_adds_full_block(pkcs7: Pkcs7Padding) -> None:
+        assert pkcs7.pad(bytes(0)) == bytes([AES_BLOCK_SIZE]) * AES_BLOCK_SIZE
+
+    @staticmethod
+    def test_pad_partial_block(pkcs7: Pkcs7Padding) -> None:
+        assert pkcs7.pad(b'ABC') == b'ABC' + bytes([13]) * 13
+
+    @staticmethod
+    def test_pad_aligned_data_adds_full_block(pkcs7: Pkcs7Padding) -> None:
+        data: bytes = bytes(range(AES_BLOCK_SIZE))
+        assert pkcs7.pad(data) == data + bytes([AES_BLOCK_SIZE]) * AES_BLOCK_SIZE
+
+    @staticmethod
+    def test_unpad_rejects_empty_data(pkcs7: Pkcs7Padding) -> None:
+        with raises(
+            expected_exception=ValueError,
+            match='padded data must not be empty',
+        ):
+            pkcs7.unpad(bytes(0))
+
+    @staticmethod
+    def test_unpad_rejects_unaligned_data(pkcs7: Pkcs7Padding) -> None:
+        with raises(
+            expected_exception=ValueError,
+            match=escape('expected len(data) % 16 == 0, got 15'),
+        ):
+            pkcs7.unpad(bytes(AES_BLOCK_SIZE - 1))
+
+    @staticmethod
+    def test_unpad_rejects_zero_padding_size(pkcs7: Pkcs7Padding) -> None:
+        with raises(
+            expected_exception=ValueError,
+            match='invalid PKCS#7 padding size',
+        ):
+            pkcs7.unpad(bytes(AES_BLOCK_SIZE - 1) + b'\x00')
+
+    @staticmethod
+    def test_unpad_rejects_padding_size_larger_than_block(pkcs7: Pkcs7Padding) -> None:
+        with raises(
+            expected_exception=ValueError,
+            match='invalid PKCS#7 padding size',
+        ):
+            pkcs7.unpad(bytes(AES_BLOCK_SIZE - 1) + bytes([AES_BLOCK_SIZE + 1]))
+
+    @staticmethod
+    def test_unpad_rejects_inconsistent_padding_bytes(pkcs7: Pkcs7Padding) -> None:
+        with raises(
+            expected_exception=ValueError,
+            match='invalid PKCS#7 padding bytes',
+        ):
+            pkcs7.unpad(b'A' * 13 + b'\x02\x03\x03')
+
+    @staticmethod
+    @given(data=binary())
+    @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+    def test_unpad_inverts_pad(pkcs7: Pkcs7Padding, data: bytes) -> None:
+        assert pkcs7.unpad(pkcs7.pad(data)) == data
+
+    @staticmethod
+    @given(data=binary())
+    @settings(suppress_health_check=[HealthCheck.function_scoped_fixture])
+    def test_padding_structure(pkcs7: Pkcs7Padding, data: bytes) -> None:
+        padded_data: bytes = pkcs7.pad(data)
+        padding_size: int = AES_BLOCK_SIZE - len(data) % AES_BLOCK_SIZE
+        assert len(padded_data) % AES_BLOCK_SIZE == 0
+        assert len(padded_data) == len(data) + padding_size
+        assert padded_data[: len(data)] == data
+        assert padded_data[len(data) :] == bytes([padding_size]) * padding_size
