@@ -2,12 +2,13 @@ from re import escape
 
 from hypothesis import given, HealthCheck, settings
 from hypothesis.strategies import binary
-from pytest import raises
+from pytest import mark, raises
 
 from purepython_aes.aes.padding import Pkcs7Padding
 from purepython_aes.const import AES_BLOCK_SIZE
 
 
+@mark.quick
 class TestPkcs7Padding:
     @staticmethod
     def test_pad_empty_data_adds_full_block(pkcs7: Pkcs7Padding) -> None:

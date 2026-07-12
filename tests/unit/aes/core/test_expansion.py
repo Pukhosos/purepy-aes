@@ -20,6 +20,7 @@ AES_CONFIGURATIONS: Final[tuple[tuple[int, int], tuple[int, int], tuple[int, int
 )
 
 
+@mark.quick
 @mark.parametrize(('key_size', 'round_count'), AES_CONFIGURATIONS)
 def test_expand_key_returns_corrent_number_of_keys(
     key_size: int,
@@ -29,12 +30,14 @@ def test_expand_key_returns_corrent_number_of_keys(
     assert len(round_keys) == round_count + 1
 
 
+@mark.quick
 @mark.parametrize(('key_size', 'round_count'), AES_CONFIGURATIONS)
 def test_expand_key_returns_16_byte_round_keys(key_size: int, round_count: int) -> None:
     round_keys: tuple[bytes, ...] = expand_key(bytes(key_size), round_count)
     assert all(len(round_key) == AES_BLOCK_SIZE for round_key in round_keys)
 
 
+@mark.quick
 @mark.parametrize(('key_size', 'round_count'), AES_CONFIGURATIONS)
 def test_expanded_schedule_starts_with_original_key(
     key_size: int,
@@ -45,6 +48,7 @@ def test_expanded_schedule_starts_with_original_key(
     assert b''.join(round_keys).startswith(original_key)
 
 
+@mark.quick
 def test_aes_128_fips_197_key_schedule() -> None:
     key: bytes = bytes.fromhex('2b7e151628aed2a6abf7158809cf4f3c')
     expected_round_keys: tuple[bytes, ...] = tuple(
@@ -66,6 +70,7 @@ def test_aes_128_fips_197_key_schedule() -> None:
     assert expand_key(key, round_count=AES_128_ROUND_COUNT) == expected_round_keys
 
 
+@mark.quick
 def test_aes_192_fips_197_key_schedule() -> None:
     key: bytes = bytes.fromhex('8e73b0f7da0e6452c810f32b809079e562f8ead2522c6b7b')
     expected_round_keys: tuple[bytes, ...] = tuple(
@@ -89,6 +94,7 @@ def test_aes_192_fips_197_key_schedule() -> None:
     assert expand_key(key, round_count=AES_192_ROUND_COUNT) == expected_round_keys
 
 
+@mark.quick
 def test_aes_256_fips_197_key_schedule() -> None:
     key: bytes = bytes.fromhex(
         '603deb1015ca71be2b73aef0857d77811f352c073b6108d72d9810a30914dff4'

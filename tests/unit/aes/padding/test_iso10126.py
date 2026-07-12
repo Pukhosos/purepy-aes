@@ -3,7 +3,7 @@ from typing import ClassVar
 
 from hypothesis import given, HealthCheck, settings
 from hypothesis.strategies import binary
-from pytest import MonkeyPatch, raises
+from pytest import mark, MonkeyPatch, raises
 
 from purepython_aes.aes.padding import Iso10126Padding
 from purepython_aes.const import AES_BLOCK_SIZE
@@ -26,6 +26,7 @@ class PatchTokenBytes:
         return bytes(range(length))
 
 
+@mark.quick
 class TestIso10126Padding:
     @staticmethod
     def test_pad_uses_random_fill_and_length_byte(

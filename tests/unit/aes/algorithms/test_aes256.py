@@ -1,4 +1,5 @@
 from hypothesis import given
+from pytest import mark
 
 from purepython_aes.aes.algorithms import Aes256
 from purepython_aes.const import AES_256_KEY_SIZE, AES_256_ROUND_COUNT
@@ -6,6 +7,7 @@ from tests.unit.aes.algorithms.strategies import aes256
 from tests.unit.aes.strategies import aes_blocks
 
 
+@mark.quick
 class TestAes256:
     @staticmethod
     def test_aes_256_key_size() -> None:
