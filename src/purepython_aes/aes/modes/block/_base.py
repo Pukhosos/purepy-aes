@@ -11,13 +11,13 @@ class BlockCipherMode(AesMode, ABC):
     padding: BasePadding
 
     @abstractmethod
-    def encrypt_blocks(self, padded_plaintext: bytes) -> bytes:
+    def __encrypt_blocks__(self, padded_plaintext: bytes) -> bytes:
         """Encrypt plaintext containing complete blocks."""
 
         raise NotImplementedError
 
     @abstractmethod
-    def decrypt_blocks(self, ciphertext: bytes) -> bytes:
+    def __decrypt_blocks__(self, ciphertext: bytes) -> bytes:
         """Decrypt ciphertext containing complete blocks."""
 
         raise NotImplementedError
@@ -25,11 +25,11 @@ class BlockCipherMode(AesMode, ABC):
     def encrypt(self, plaintext: bytes) -> bytes:
         """Pad and encrypt a byte string."""
 
-        return self.encrypt_blocks(self.padding.pad(plaintext))
+        return self.__encrypt_blocks__(self.padding.pad(plaintext))
 
     def decrypt(self, ciphertext: bytes) -> bytes:
         """Decrypt and unpad a byte string."""
 
         if len(ciphertext) % AES_BLOCK_SIZE != 0:
             raise ValueError(f'len(ciphertext) % {AES_BLOCK_SIZE} must be 0')
-        return self.padding.unpad(self.decrypt_blocks(ciphertext))
+        return self.padding.unpad(self.__decrypt_blocks__(ciphertext))

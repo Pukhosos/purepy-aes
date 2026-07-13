@@ -12,7 +12,7 @@ from purepython_aes.const import AES_BLOCK_SIZE
 class CbcMode(BlockCipherMode):
     """Cipher Block Chaining mode of operation."""
 
-    def encrypt_blocks(self, padded_plaintext: bytes) -> bytes:
+    def __encrypt_blocks__(self, padded_plaintext: bytes) -> bytes:
         initialization_vector: bytes = token_bytes(AES_BLOCK_SIZE)
         previous_ciphertext_block: bytes = initialization_vector
         ciphertext_blocks: list[bytes] = [initialization_vector]
@@ -23,7 +23,7 @@ class CbcMode(BlockCipherMode):
             previous_ciphertext_block = ciphertext_block
         return bytes(0).join(ciphertext_blocks)
 
-    def decrypt_blocks(self, ciphertext: bytes) -> bytes:
+    def __decrypt_blocks__(self, ciphertext: bytes) -> bytes:
         initialization_vector, *ciphertext_blocks = split_into_blocks(ciphertext)
         previous_ciphertext_block: bytes = initialization_vector
         plaintext_blocks: list[bytes] = []
