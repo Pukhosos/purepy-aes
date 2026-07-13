@@ -12,6 +12,7 @@ from purepython_aes.aes import (
     Iso7816Padding,
     Iso10126Padding,
     NoPadding,
+    PcbcMode,
     Pkcs7Padding,
     ZeroPadding,
 )
@@ -30,6 +31,7 @@ __all__: list[str] = [
     'Iso7816Padding',
     'Iso10126Padding',
     'NoPadding',
+    'PcbcMode',
     'Pkcs7Padding',
     'ZeroPadding',
 ]
