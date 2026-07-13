@@ -48,16 +48,6 @@ class TestAesState:
         )
 
     @staticmethod
-    @mark.parametrize('key', (bytes(), bytes(1), bytes(15), bytes(17), bytes(32)))
-    def test_add_round_key_rejects_invalid_key_lengths(key: bytes) -> None:
-        state: AesState = AesState.from_bytes(bytes(AES_BLOCK_SIZE))
-        with raises(
-            expected_exception=ValueError,
-            match=escape(f'expected len(key) == {AES_BLOCK_SIZE}, got {len(key)}'),
-        ):
-            state.add_round_key(key)
-
-    @staticmethod
     @given(block=aes_blocks)
     def test_subs_bytes_applies_sbox(block: bytes) -> None:
         state: AesState = AesState.from_bytes(block)

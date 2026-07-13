@@ -27,8 +27,6 @@ class AesState:
     def add_round_key(self, key: bytes) -> None:
         """XOR a round key into this state."""
 
-        if len(key) != AES_BLOCK_SIZE:
-            raise ValueError(f'expected len(key) == {AES_BLOCK_SIZE}, got {len(key)}')
         for index, key_byte in enumerate(key):
             self.__b[index] ^= key_byte
 
