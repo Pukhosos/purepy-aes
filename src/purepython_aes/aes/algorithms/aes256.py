@@ -1,9 +1,11 @@
+from dataclasses import dataclass
 from typing import ClassVar
 
 from purepython_aes.aes.core import AesCore
 from purepython_aes.const import AES_256_KEY_SIZE, AES_256_ROUND_COUNT
 
 
+@dataclass(init=False, slots=True)
 class Aes256(AesCore):
     """AES-256 encryption algorithm."""
 

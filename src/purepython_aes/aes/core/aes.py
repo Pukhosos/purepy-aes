@@ -6,7 +6,7 @@ from purepython_aes.aes.interface import Aes
 from purepython_aes.const import AES_BLOCK_SIZE
 
 
-@dataclass(slots=True)
+@dataclass(init=False, slots=True)
 class AesCore(Aes):
     """Implement `encrypt_block` and `decrypt_block` methods."""
 
