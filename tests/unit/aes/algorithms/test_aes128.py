@@ -10,11 +10,11 @@ from tests.unit.aes.strategies import aes128, aes_blocks
 class TestAes128:
     @staticmethod
     def test_aes_128_key_size() -> None:
-        assert Aes128(bytes(AES_128_KEY_SIZE)).key_size == AES_128_KEY_SIZE
+        assert Aes128(bytes(AES_128_KEY_SIZE)).__key_size__ == AES_128_KEY_SIZE
 
     @staticmethod
     def test_aes_128_round_count() -> None:
-        assert Aes128(bytes(AES_128_KEY_SIZE)).round_count == AES_128_ROUND_COUNT
+        assert Aes128(bytes(AES_128_KEY_SIZE)).__round_count__ == AES_128_ROUND_COUNT
 
     @staticmethod
     def test_fips_197_aes_128_known_answer(example_plaintext: bytes) -> None:

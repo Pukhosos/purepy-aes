@@ -10,11 +10,11 @@ from tests.unit.aes.strategies import aes192, aes_blocks
 class TestAes192:
     @staticmethod
     def test_aes_192_key_size() -> None:
-        assert Aes192(bytes(AES_192_KEY_SIZE)).key_size == AES_192_KEY_SIZE
+        assert Aes192(bytes(AES_192_KEY_SIZE)).__key_size__ == AES_192_KEY_SIZE
 
     @staticmethod
     def test_aes_192_round_count() -> None:
-        assert Aes192(bytes(AES_192_KEY_SIZE)).round_count == AES_192_ROUND_COUNT
+        assert Aes192(bytes(AES_192_KEY_SIZE)).__round_count__ == AES_192_ROUND_COUNT
 
     @staticmethod
     def test_fips_197_aes_192_known_answer(example_plaintext: bytes) -> None:

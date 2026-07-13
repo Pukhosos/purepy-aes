@@ -13,9 +13,11 @@ class AesCore(Aes):
     __round_keys: tuple[bytes, ...]
 
     def __init__(self, key: bytes) -> None:
-        if len(key) != self.key_size:
-            raise ValueError(f'expected len(key) == {self.key_size}, got {len(key)}')
-        self.__round_keys = expand_key(key, self.round_count)
+        if len(key) != self.__key_size__:
+            raise ValueError(
+                f'expected len(key) == {self.__key_size__}, got {len(key)}'
+            )
+        self.__round_keys = expand_key(key, self.__round_count__)
 
     def encrypt_block(self, plaintext: bytes) -> bytes:
         if len(plaintext) != AES_BLOCK_SIZE:
@@ -24,14 +26,14 @@ class AesCore(Aes):
             )
         state: AesState = AesState.from_bytes(plaintext)
         state.add_round_key(self.__round_keys[0])
-        for round_index in range(1, self.round_count):
+        for round_index in range(1, self.__round_count__):
             state.subs_bytes()
             state.shift_rows()
             state.mix_columns()
             state.add_round_key(self.__round_keys[round_index])
         state.subs_bytes()
         state.shift_rows()
-        state.add_round_key(self.__round_keys[self.round_count])
+        state.add_round_key(self.__round_keys[self.__round_count__])
         return state.to_bytes()
 
     def decrypt_block(self, ciphertext: bytes) -> bytes:
@@ -40,8 +42,8 @@ class AesCore(Aes):
                 f'Expected len(ciphertext) == {AES_BLOCK_SIZE}, got {len(ciphertext)}'
             )
         state: AesState = AesState.from_bytes(ciphertext)
-        state.add_round_key(self.__round_keys[self.round_count])
-        for round_index in range(self.round_count - 1, 0, -1):
+        state.add_round_key(self.__round_keys[self.__round_count__])
+        for round_index in range(self.__round_count__ - 1, 0, -1):
             state.inverse_shift_rows()
             state.inverse_subs_bytes()
             state.add_round_key(self.__round_keys[round_index])
