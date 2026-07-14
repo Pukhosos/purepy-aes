@@ -25,7 +25,7 @@ class CfbMode(StreamCipherMode):
                 )
             )
 
-    def transform_for_encryption(
+    def __encrypt_stream__(
         self,
         initialization_value: bytes,
         plaintext: bytes,
@@ -50,7 +50,7 @@ class CfbMode(StreamCipherMode):
             )
         return bytes(ciphertext)
 
-    def transform_for_decryption(
+    def __decrypt_stream__(
         self,
         initialization_value: bytes,
         ciphertext: bytes,

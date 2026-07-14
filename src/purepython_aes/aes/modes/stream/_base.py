@@ -10,17 +10,17 @@ from purepython_aes.const import AES_BLOCK_SIZE
 class StreamCipherMode(CipherMode, ABC):
     def encrypt(self, plaintext: bytes) -> bytes:
         iv: bytes = token_bytes(AES_BLOCK_SIZE)
-        ciphertext: bytes = self.transform_for_encryption(iv, plaintext)
+        ciphertext: bytes = self.__encrypt_stream__(iv, plaintext)
         return iv + ciphertext
 
     def decrypt(self, ciphertext: bytes) -> bytes:
-        return self.transform_for_decryption(
+        return self.__decrypt_stream__(
             initialization_value=ciphertext[:AES_BLOCK_SIZE],
             ciphertext=ciphertext[AES_BLOCK_SIZE:],
         )
 
     @abstractmethod
-    def transform_for_encryption(
+    def __encrypt_stream__(
         self,
         initialization_value: bytes,
         plaintext: bytes,
@@ -30,7 +30,7 @@ class StreamCipherMode(CipherMode, ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def transform_for_decryption(
+    def __decrypt_stream__(
         self,
         initialization_value: bytes,
         ciphertext: bytes,
