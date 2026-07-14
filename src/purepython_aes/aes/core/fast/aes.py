@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from dataclasses import dataclass
 
 from purepython_aes.aes.core.fast.expansion import (
@@ -29,14 +30,17 @@ from purepython_aes.const import (
     INVERSE_SBOX,
     SBOX,
 )
+from purepython_aes.types import IntLookupTable256
 
 
 @dataclass(init=False, slots=True)
 class FastAesCore(Aes):
     """Implement optimized `encrypt_block` and `decrypt_block` methods."""
 
-    __decryption_round_keys: RoundKeys
     __encryption_round_keys: RoundKeys
+    __final_encryption_key: RoundKey
+    __decryption_round_keys: RoundKeys
+    __final_decryption_key: RoundKey
 
     def __init__(self, key: bytes) -> None:
         if len(key) != self.__key_size__:
@@ -45,13 +49,25 @@ class FastAesCore(Aes):
             )
         key_size: int = len(key)
         if key_size == AES_128_KEY_SIZE:
-            self.__encryption_round_keys = expand_aes128_key(key)
+            (
+                *self.__encryption_round_keys,
+                self.__final_encryption_key,
+            ) = expand_aes128_key(key)
         if key_size == AES_192_KEY_SIZE:
-            self.__encryption_round_keys = expand_aes192_key(key)
+            (
+                *self.__encryption_round_keys,
+                self.__final_encryption_key,
+            ) = expand_aes192_key(key)
         if key_size == AES_256_KEY_SIZE:
-            self.__encryption_round_keys = expand_aes256_key(key)
-        self.__decryption_round_keys = build_decryption_round_keys(
-            self.__encryption_round_keys
+            (
+                *self.__encryption_round_keys,
+                self.__final_encryption_key,
+            ) = expand_aes256_key(key)
+        (
+            *self.__decryption_round_keys,
+            self.__final_decryption_key,
+        ) = build_decryption_round_keys(
+            self.__encryption_round_keys + [self.__final_encryption_key]
         )
 
     def encrypt_block(self, plaintext: bytes) -> bytes:
@@ -61,74 +77,96 @@ class FastAesCore(Aes):
             raise ValueError(
                 f'expected len(plaintext) == {AES_BLOCK_SIZE}, got {len(plaintext)}'
             )
-        round_keys: RoundKeys = self.__encryption_round_keys
+        encryption_table_0: IntLookupTable256 = ENCRYPTION_TABLE_0
+        encryption_table_1: IntLookupTable256 = ENCRYPTION_TABLE_1
+        encryption_table_2: IntLookupTable256 = ENCRYPTION_TABLE_2
+        encryption_table_3: IntLookupTable256 = ENCRYPTION_TABLE_3
+        sbox: IntLookupTable256 = SBOX
+        round_keys: Iterator[RoundKey] = iter(self.__encryption_round_keys)
         plaintext_integer: int = int.from_bytes(plaintext, byteorder='big')
-        initial_round_key: RoundKey = round_keys[0]
+        initial_round_key: RoundKey = next(round_keys)
         state_0: int = (plaintext_integer >> 96) ^ initial_round_key[0]
         state_1: int = ((plaintext_integer >> 64) & 0xFFFFFFFF) ^ initial_round_key[1]
         state_2: int = ((plaintext_integer >> 32) & 0xFFFFFFFF) ^ initial_round_key[2]
         state_3: int = (plaintext_integer & 0xFFFFFFFF) ^ initial_round_key[3]
-        for round_index in range(1, self.__round_count__):
-            round_key: RoundKey = round_keys[round_index]
-            next_state_0: int = (
-                ENCRYPTION_TABLE_0[(state_0 >> 24) & 0xFF]
-                ^ ENCRYPTION_TABLE_1[(state_1 >> 16) & 0xFF]
-                ^ ENCRYPTION_TABLE_2[(state_2 >> 8) & 0xFF]
-                ^ ENCRYPTION_TABLE_3[state_3 & 0xFF]
-                ^ round_key[0]
+        for word_0, word_1, word_2, word_3 in round_keys:
+            state_0, state_1, state_2, state_3 = (
+                (
+                    encryption_table_0[(state_0 >> 24) & 0xFF]
+                    ^ encryption_table_1[(state_1 >> 16) & 0xFF]
+                    ^ encryption_table_2[(state_2 >> 8) & 0xFF]
+                    ^ encryption_table_3[state_3 & 0xFF]
+                    ^ word_0
+                ),
+                (
+                    encryption_table_0[(state_1 >> 24) & 0xFF]
+                    ^ encryption_table_1[(state_2 >> 16) & 0xFF]
+                    ^ encryption_table_2[(state_3 >> 8) & 0xFF]
+                    ^ encryption_table_3[state_0 & 0xFF]
+                    ^ word_1
+                ),
+                (
+                    encryption_table_0[(state_2 >> 24) & 0xFF]
+                    ^ encryption_table_1[(state_3 >> 16) & 0xFF]
+                    ^ encryption_table_2[(state_0 >> 8) & 0xFF]
+                    ^ encryption_table_3[state_1 & 0xFF]
+                    ^ word_2
+                ),
+                (
+                    encryption_table_0[(state_3 >> 24) & 0xFF]
+                    ^ encryption_table_1[(state_0 >> 16) & 0xFF]
+                    ^ encryption_table_2[(state_1 >> 8) & 0xFF]
+                    ^ encryption_table_3[state_2 & 0xFF]
+                    ^ word_3
+                ),
             )
-            next_state_1: int = (
-                ENCRYPTION_TABLE_0[(state_1 >> 24) & 0xFF]
-                ^ ENCRYPTION_TABLE_1[(state_2 >> 16) & 0xFF]
-                ^ ENCRYPTION_TABLE_2[(state_3 >> 8) & 0xFF]
-                ^ ENCRYPTION_TABLE_3[state_0 & 0xFF]
-                ^ round_key[1]
-            )
-            next_state_2: int = (
-                ENCRYPTION_TABLE_0[(state_2 >> 24) & 0xFF]
-                ^ ENCRYPTION_TABLE_1[(state_3 >> 16) & 0xFF]
-                ^ ENCRYPTION_TABLE_2[(state_0 >> 8) & 0xFF]
-                ^ ENCRYPTION_TABLE_3[state_1 & 0xFF]
-                ^ round_key[2]
-            )
-            next_state_3: int = (
-                ENCRYPTION_TABLE_0[(state_3 >> 24) & 0xFF]
-                ^ ENCRYPTION_TABLE_1[(state_0 >> 16) & 0xFF]
-                ^ ENCRYPTION_TABLE_2[(state_1 >> 8) & 0xFF]
-                ^ ENCRYPTION_TABLE_3[state_2 & 0xFF]
-                ^ round_key[3]
-            )
-            state_0 = next_state_0
-            state_1 = next_state_1
-            state_2 = next_state_2
-            state_3 = next_state_3
-        final_round_key: RoundKey = round_keys[self.__round_count__]
-        output_0: int = (
-            (SBOX[(state_0 >> 24) & 0xFF] << 24)
-            | (SBOX[(state_1 >> 16) & 0xFF] << 16)
-            | (SBOX[(state_2 >> 8) & 0xFF] << 8)
-            | SBOX[state_3 & 0xFF]
-        ) ^ final_round_key[0]
-        output_1: int = (
-            (SBOX[(state_1 >> 24) & 0xFF] << 24)
-            | (SBOX[(state_2 >> 16) & 0xFF] << 16)
-            | (SBOX[(state_3 >> 8) & 0xFF] << 8)
-            | SBOX[state_0 & 0xFF]
-        ) ^ final_round_key[1]
-        output_2: int = (
-            (SBOX[(state_2 >> 24) & 0xFF] << 24)
-            | (SBOX[(state_3 >> 16) & 0xFF] << 16)
-            | (SBOX[(state_0 >> 8) & 0xFF] << 8)
-            | SBOX[state_1 & 0xFF]
-        ) ^ final_round_key[2]
-        output_3: int = (
-            (SBOX[(state_3 >> 24) & 0xFF] << 24)
-            | (SBOX[(state_0 >> 16) & 0xFF] << 16)
-            | (SBOX[(state_1 >> 8) & 0xFF] << 8)
-            | SBOX[state_2 & 0xFF]
-        ) ^ final_round_key[3]
+        word_0, word_1, word_2, word_3 = self.__final_encryption_key
         output_integer: int = (
-            (output_0 << 96) | (output_1 << 64) | (output_2 << 32) | output_3
+            (
+                (
+                    (
+                        (sbox[(state_0 >> 24) & 0xFF] << 24)
+                        | (sbox[(state_1 >> 16) & 0xFF] << 16)
+                        | (sbox[(state_2 >> 8) & 0xFF] << 8)
+                        | sbox[state_3 & 0xFF]
+                    )
+                    ^ word_0
+                )
+                << 96
+            )
+            | (
+                (
+                    (
+                        (sbox[(state_1 >> 24) & 0xFF] << 24)
+                        | (sbox[(state_2 >> 16) & 0xFF] << 16)
+                        | (sbox[(state_3 >> 8) & 0xFF] << 8)
+                        | sbox[state_0 & 0xFF]
+                    )
+                    ^ word_1
+                )
+                << 64
+            )
+            | (
+                (
+                    (
+                        (sbox[(state_2 >> 24) & 0xFF] << 24)
+                        | (sbox[(state_3 >> 16) & 0xFF] << 16)
+                        | (sbox[(state_0 >> 8) & 0xFF] << 8)
+                        | sbox[state_1 & 0xFF]
+                    )
+                    ^ word_2
+                )
+                << 32
+            )
+            | (
+                (
+                    (sbox[(state_3 >> 24) & 0xFF] << 24)
+                    | (sbox[(state_0 >> 16) & 0xFF] << 16)
+                    | (sbox[(state_1 >> 8) & 0xFF] << 8)
+                    | sbox[state_2 & 0xFF]
+                )
+                ^ word_3
+            )
         )
         return output_integer.to_bytes(AES_BLOCK_SIZE, byteorder='big')
 
@@ -139,76 +177,95 @@ class FastAesCore(Aes):
             raise ValueError(
                 f'expected len(ciphertext) == {AES_BLOCK_SIZE}, got {len(ciphertext)}'
             )
-        round_keys: RoundKeys = self.__decryption_round_keys
-        ciphertext_integer: int = int.from_bytes(
-            ciphertext,
-            byteorder='big',
-        )
-        initial_round_key: RoundKey = round_keys[0]
+        decryption_table_0: IntLookupTable256 = DECRYPTION_TABLE_0
+        decryption_table_1: IntLookupTable256 = DECRYPTION_TABLE_1
+        decryption_table_2: IntLookupTable256 = DECRYPTION_TABLE_2
+        decryption_table_3: IntLookupTable256 = DECRYPTION_TABLE_3
+        inverse_sbox: IntLookupTable256 = INVERSE_SBOX
+        round_keys: Iterator[RoundKey] = iter(self.__decryption_round_keys)
+        ciphertext_integer: int = int.from_bytes(ciphertext, byteorder='big')
+        initial_round_key: RoundKey = next(round_keys)
         state_0: int = (ciphertext_integer >> 96) ^ initial_round_key[0]
         state_1: int = ((ciphertext_integer >> 64) & 0xFFFFFFFF) ^ initial_round_key[1]
         state_2: int = ((ciphertext_integer >> 32) & 0xFFFFFFFF) ^ initial_round_key[2]
         state_3: int = (ciphertext_integer & 0xFFFFFFFF) ^ initial_round_key[3]
-        for round_index in range(1, self.__round_count__):
-            round_key: RoundKey = round_keys[round_index]
-            next_state_0: int = (
-                DECRYPTION_TABLE_0[(state_0 >> 24) & 0xFF]
-                ^ DECRYPTION_TABLE_1[(state_3 >> 16) & 0xFF]
-                ^ DECRYPTION_TABLE_2[(state_2 >> 8) & 0xFF]
-                ^ DECRYPTION_TABLE_3[state_1 & 0xFF]
-                ^ round_key[0]
+        for word_0, word_1, word_2, word_3 in round_keys:
+            state_0, state_1, state_2, state_3 = (
+                (
+                    decryption_table_0[(state_0 >> 24) & 0xFF]
+                    ^ decryption_table_1[(state_3 >> 16) & 0xFF]
+                    ^ decryption_table_2[(state_2 >> 8) & 0xFF]
+                    ^ decryption_table_3[state_1 & 0xFF]
+                    ^ word_0
+                ),
+                (
+                    decryption_table_0[(state_1 >> 24) & 0xFF]
+                    ^ decryption_table_1[(state_0 >> 16) & 0xFF]
+                    ^ decryption_table_2[(state_3 >> 8) & 0xFF]
+                    ^ decryption_table_3[state_2 & 0xFF]
+                    ^ word_1
+                ),
+                (
+                    decryption_table_0[(state_2 >> 24) & 0xFF]
+                    ^ decryption_table_1[(state_1 >> 16) & 0xFF]
+                    ^ decryption_table_2[(state_0 >> 8) & 0xFF]
+                    ^ decryption_table_3[state_3 & 0xFF]
+                    ^ word_2
+                ),
+                (
+                    decryption_table_0[(state_3 >> 24) & 0xFF]
+                    ^ decryption_table_1[(state_2 >> 16) & 0xFF]
+                    ^ decryption_table_2[(state_1 >> 8) & 0xFF]
+                    ^ decryption_table_3[state_0 & 0xFF]
+                    ^ word_3
+                ),
             )
-            next_state_1: int = (
-                DECRYPTION_TABLE_0[(state_1 >> 24) & 0xFF]
-                ^ DECRYPTION_TABLE_1[(state_0 >> 16) & 0xFF]
-                ^ DECRYPTION_TABLE_2[(state_3 >> 8) & 0xFF]
-                ^ DECRYPTION_TABLE_3[state_2 & 0xFF]
-                ^ round_key[1]
-            )
-            next_state_2: int = (
-                DECRYPTION_TABLE_0[(state_2 >> 24) & 0xFF]
-                ^ DECRYPTION_TABLE_1[(state_1 >> 16) & 0xFF]
-                ^ DECRYPTION_TABLE_2[(state_0 >> 8) & 0xFF]
-                ^ DECRYPTION_TABLE_3[state_3 & 0xFF]
-                ^ round_key[2]
-            )
-            next_state_3: int = (
-                DECRYPTION_TABLE_0[(state_3 >> 24) & 0xFF]
-                ^ DECRYPTION_TABLE_1[(state_2 >> 16) & 0xFF]
-                ^ DECRYPTION_TABLE_2[(state_1 >> 8) & 0xFF]
-                ^ DECRYPTION_TABLE_3[state_0 & 0xFF]
-                ^ round_key[3]
-            )
-            state_0 = next_state_0
-            state_1 = next_state_1
-            state_2 = next_state_2
-            state_3 = next_state_3
-        final_round_key: RoundKey = round_keys[self.__round_count__]
-        output_0: int = (
-            (INVERSE_SBOX[(state_0 >> 24) & 0xFF] << 24)
-            | (INVERSE_SBOX[(state_3 >> 16) & 0xFF] << 16)
-            | (INVERSE_SBOX[(state_2 >> 8) & 0xFF] << 8)
-            | INVERSE_SBOX[state_1 & 0xFF]
-        ) ^ final_round_key[0]
-        output_1: int = (
-            (INVERSE_SBOX[(state_1 >> 24) & 0xFF] << 24)
-            | (INVERSE_SBOX[(state_0 >> 16) & 0xFF] << 16)
-            | (INVERSE_SBOX[(state_3 >> 8) & 0xFF] << 8)
-            | INVERSE_SBOX[state_2 & 0xFF]
-        ) ^ final_round_key[1]
-        output_2: int = (
-            (INVERSE_SBOX[(state_2 >> 24) & 0xFF] << 24)
-            | (INVERSE_SBOX[(state_1 >> 16) & 0xFF] << 16)
-            | (INVERSE_SBOX[(state_0 >> 8) & 0xFF] << 8)
-            | INVERSE_SBOX[state_3 & 0xFF]
-        ) ^ final_round_key[2]
-        output_3: int = (
-            (INVERSE_SBOX[(state_3 >> 24) & 0xFF] << 24)
-            | (INVERSE_SBOX[(state_2 >> 16) & 0xFF] << 16)
-            | (INVERSE_SBOX[(state_1 >> 8) & 0xFF] << 8)
-            | INVERSE_SBOX[state_0 & 0xFF]
-        ) ^ final_round_key[3]
+        word_0, word_1, word_2, word_3 = self.__final_decryption_key
         output_integer: int = (
-            (output_0 << 96) | (output_1 << 64) | (output_2 << 32) | output_3
+            (
+                (
+                    (
+                        (inverse_sbox[(state_0 >> 24) & 0xFF] << 24)
+                        | (inverse_sbox[(state_3 >> 16) & 0xFF] << 16)
+                        | (inverse_sbox[(state_2 >> 8) & 0xFF] << 8)
+                        | inverse_sbox[state_1 & 0xFF]
+                    )
+                    ^ word_0
+                )
+                << 96
+            )
+            | (
+                (
+                    (
+                        (inverse_sbox[(state_1 >> 24) & 0xFF] << 24)
+                        | (inverse_sbox[(state_0 >> 16) & 0xFF] << 16)
+                        | (inverse_sbox[(state_3 >> 8) & 0xFF] << 8)
+                        | inverse_sbox[state_2 & 0xFF]
+                    )
+                    ^ word_1
+                )
+                << 64
+            )
+            | (
+                (
+                    (
+                        (inverse_sbox[(state_2 >> 24) & 0xFF] << 24)
+                        | (inverse_sbox[(state_1 >> 16) & 0xFF] << 16)
+                        | (inverse_sbox[(state_0 >> 8) & 0xFF] << 8)
+                        | inverse_sbox[state_3 & 0xFF]
+                    )
+                    ^ word_2
+                )
+                << 32
+            )
+            | (
+                (
+                    (inverse_sbox[(state_3 >> 24) & 0xFF] << 24)
+                    | (inverse_sbox[(state_2 >> 16) & 0xFF] << 16)
+                    | (inverse_sbox[(state_1 >> 8) & 0xFF] << 8)
+                    | inverse_sbox[state_0 & 0xFF]
+                )
+                ^ word_3
+            )
         )
         return output_integer.to_bytes(AES_BLOCK_SIZE, byteorder='big')
