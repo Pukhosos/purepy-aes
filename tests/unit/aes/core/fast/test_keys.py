@@ -19,11 +19,11 @@ from tests.unit.aes.strategies import aes128key, aes192key, aes256key
 @mark.quick
 @mark.parametrize(
     'round_count',
-    (
+    [
         AES_128_ROUND_COUNT,
         AES_192_ROUND_COUNT,
         AES_256_ROUND_COUNT,
-    ),
+    ],
 )
 def test_preserves_round_key_count(round_count: int) -> None:
     encryption_round_keys: RoundKeys = [

@@ -29,8 +29,8 @@ def xor_columns(
 
 @mark.quick
 @mark.parametrize(
-    ('left', 'right', 'expected'),
-    (
+    ['left', 'right', 'expected'],
+    [
         (0x00, 0x00, 0x00),
         (0x00, 0x01, 0x00),
         (0x01, 0x00, 0x00),
@@ -45,7 +45,7 @@ def xor_columns(
         (0xFF, 0xFF, 0x13),
         (0x80, 0x02, 0x1B),
         (0x80, 0x80, 0x9A),
-    ),
+    ],
 )
 def test_galois256_multiply_known_values(left: int, right: int, expected: int) -> None:
     assert galois256_multiply(left, right) == expected
@@ -107,8 +107,8 @@ def test_galois256_multiply_right_distributes_over_xor() -> None:
 
 @mark.quick
 @mark.parametrize(
-    ('values', 'expected'),
-    (
+    ['values', 'expected'],
+    [
         ((), 0x00),
         ((0x00,), 0x00),
         ((0x57,), 0x57),
@@ -117,7 +117,7 @@ def test_galois256_multiply_right_distributes_over_xor() -> None:
         ((0xFF, 0x0F, 0xF0), 0x00),
         ((0x01, 0x02, 0x04, 0x08), 0x0F),
         ((0xDE, 0xAD, 0xBE, 0xEF), 0x22),
-    ),
+    ],
 )
 def test_xor_bytes_known_values(values: tuple[int, ...], expected: int) -> None:
     assert xor_bytes(*values) == expected

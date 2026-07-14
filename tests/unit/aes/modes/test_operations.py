@@ -13,7 +13,7 @@ def test_xor_empty_inputs() -> None:
 
 @mark.quick
 @mark.parametrize(
-    ('left', 'right', 'expected'),
+    ['left', 'right', 'expected'],
     [
         (b'\x00', b'\x00', b'\x00'),
         (b'\x00', b'\xff', b'\xff'),
@@ -45,7 +45,7 @@ def test_xor_known_values(left: bytes, right: bytes, expected: bytes) -> None:
 
 @mark.quick
 @mark.parametrize(
-    ('left', 'right'),
+    ['left', 'right'],
     [
         (b'\x00', bytes(0)),
         (bytes(0), b'\x00'),

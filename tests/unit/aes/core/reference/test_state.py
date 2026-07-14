@@ -17,7 +17,7 @@ class TestAesState:
         assert state.to_bytes() == block
 
     @staticmethod
-    @mark.parametrize('block', (bytes(), bytes(1), bytes(15), bytes(17), bytes(32)))
+    @mark.parametrize('block', [bytes(), bytes(1), bytes(15), bytes(17), bytes(32)])
     def test_from_bytes_rejects_invalid_block_lengths(block: bytes) -> None:
         with raises(
             expected_exception=ValueError,

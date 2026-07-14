@@ -13,15 +13,15 @@ from purepython_aes.const import (
     AES_BLOCK_SIZE,
 )
 
-AES_CONFIGURATIONS: Final[tuple[tuple[int, int], tuple[int, int], tuple[int, int]]] = (
+AES_CONFIGURATIONS: Final[list[tuple[int, int]]] = [
     (AES_128_KEY_SIZE, AES_128_ROUND_COUNT),
     (AES_192_KEY_SIZE, AES_192_ROUND_COUNT),
     (AES_256_KEY_SIZE, AES_256_ROUND_COUNT),
-)
+]
 
 
 @mark.quick
-@mark.parametrize(('key_size', 'round_count'), AES_CONFIGURATIONS)
+@mark.parametrize(['key_size', 'round_count'], AES_CONFIGURATIONS)
 def test_expand_key_returns_corrent_number_of_keys(
     key_size: int,
     round_count: int,
@@ -31,14 +31,14 @@ def test_expand_key_returns_corrent_number_of_keys(
 
 
 @mark.quick
-@mark.parametrize(('key_size', 'round_count'), AES_CONFIGURATIONS)
+@mark.parametrize(['key_size', 'round_count'], AES_CONFIGURATIONS)
 def test_expand_key_returns_16_byte_round_keys(key_size: int, round_count: int) -> None:
     round_keys: tuple[bytes, ...] = expand_key(bytes(key_size), round_count)
     assert all(len(round_key) == AES_BLOCK_SIZE for round_key in round_keys)
 
 
 @mark.quick
-@mark.parametrize(('key_size', 'round_count'), AES_CONFIGURATIONS)
+@mark.parametrize(['key_size', 'round_count'], AES_CONFIGURATIONS)
 def test_expanded_schedule_starts_with_original_key(
     key_size: int,
     round_count: int,

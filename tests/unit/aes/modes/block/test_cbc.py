@@ -54,7 +54,7 @@ class TestCbcMode:
         assert cbc.decrypt(cbc.encrypt(data)) == data
 
     @staticmethod
-    @mark.parametrize(['aes'], [[Aes128], [Aes192], [Aes256]])
+    @mark.parametrize('aes', [Aes128, Aes192, Aes256])
     @given(key=aes256key, data=binary())
     def test_decrypt_inverts_encrypt_zero_padding(
         aes: type[Aes],
@@ -66,7 +66,7 @@ class TestCbcMode:
         assert cbc.decrypt(cbc.encrypt(data)) == data
 
     @staticmethod
-    @mark.parametrize(['aes'], [[Aes128], [Aes192], [Aes256]])
+    @mark.parametrize('aes', [Aes128, Aes192, Aes256])
     @given(key=aes256key, data=aes_blocks)
     def test_decrypt_inverts_encrypt_no_padding(
         aes: type[Aes],
