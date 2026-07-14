@@ -11,9 +11,11 @@ from purepython_aes.aes.modes import (
     AesMode,
     BlockCipherMode,
     CbcMode,
+    CfbMode,
     CipherMode,
     EcbMode,
     PcbcMode,
+    StreamCipherMode,
 )
 from purepython_aes.aes.padding import (
     AnsiX923Padding,
@@ -36,9 +38,11 @@ __all__: list[str] = [
     'AesMode',
     'BlockCipherMode',
     'CbcMode',
+    'CfbMode',
     'CipherMode',
     'EcbMode',
     'PcbcMode',
+    'StreamCipherMode',
     'AnsiX923Padding',
     'BasePadding',
     'Iso7816Padding',

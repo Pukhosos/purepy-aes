@@ -8,6 +8,7 @@ from purepython_aes.aes import (
     BasePadding,
     BlockCipherMode,
     CbcMode,
+    CfbMode,
     CipherMode,
     EcbMode,
     Iso7816Padding,
@@ -18,6 +19,7 @@ from purepython_aes.aes import (
     ReferenceAes128,
     ReferenceAes192,
     ReferenceAes256,
+    StreamCipherMode,
     ZeroPadding,
 )
 
@@ -31,6 +33,7 @@ __all__: list[str] = [
     'BasePadding',
     'BlockCipherMode',
     'CbcMode',
+    'CfbMode',
     'CipherMode',
     'EcbMode',
     'Iso7816Padding',
@@ -41,5 +44,6 @@ __all__: list[str] = [
     'ReferenceAes128',
     'ReferenceAes192',
     'ReferenceAes256',
+    'StreamCipherMode',
     'ZeroPadding',
 ]

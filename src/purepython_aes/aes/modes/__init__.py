@@ -1,5 +1,6 @@
 from purepython_aes.aes.modes._base import AesMode, CipherMode
 from purepython_aes.aes.modes.block import BlockCipherMode, CbcMode, EcbMode, PcbcMode
+from purepython_aes.aes.modes.stream import CfbMode, StreamCipherMode
 
 __all__: list[str] = [
     'AesMode',
@@ -8,4 +9,6 @@ __all__: list[str] = [
     'CbcMode',
     'EcbMode',
     'PcbcMode',
+    'CfbMode',
+    'StreamCipherMode',
 ]
