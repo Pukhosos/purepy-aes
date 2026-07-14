@@ -25,7 +25,7 @@ from tests.unit.aes.strategies import aes256key, aes_blocks
 
 
 @mark.quick
-class TestCbcMode:
+class TestPcbcMode:
     @staticmethod
     @mark.parametrize(
         ['aes', 'padding'],
