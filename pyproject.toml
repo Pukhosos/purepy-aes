@@ -50,7 +50,7 @@ test = [
     "pytest-xdist",
     "hypothesis",
 ]
-fuzz = ["hypofuzz"]
+fuzz = ["purepython-aes[test]", "hypofuzz"]
 build = ["build", "twine"]
 
 [build-system]
