@@ -2,6 +2,18 @@
 
 Pure-Python implementation of AES encryption algorithm.
 
+## Installation
+
+This package is available on PyPI.
+
+```sh
+pip install purepython-aes
+```
+
+### Extras
+
+This package provides four extras: `dev`, `test`, `fuzz`, and `build`. These are intended solely for development and do not add any runtime functionality.
+
 ## License
 
 `purepython-aes` is a free, open-source software distributed under the [MIT License](https://github.com/Pukhosos/purepython-aes/blob/main/LISENCE.txt).
