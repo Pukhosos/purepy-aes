@@ -50,17 +50,17 @@ class FastAesCore(Aes):
         key_size: int = len(key)
         if key_size == AES_128_KEY_SIZE:
             (
-                *self.__encryption_round_keys,
+                self.__encryption_round_keys,
                 self.__final_encryption_key,
             ) = expand_aes128_key(key)
         if key_size == AES_192_KEY_SIZE:
             (
-                *self.__encryption_round_keys,
+                self.__encryption_round_keys,
                 self.__final_encryption_key,
             ) = expand_aes192_key(key)
         if key_size == AES_256_KEY_SIZE:
             (
-                *self.__encryption_round_keys,
+                self.__encryption_round_keys,
                 self.__final_encryption_key,
             ) = expand_aes256_key(key)
         (

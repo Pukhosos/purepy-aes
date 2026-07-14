@@ -65,34 +65,34 @@ def test_last_decryption_key_is_first_encryption_key() -> None:
 @mark.quick
 @given(key=aes128key)
 def test_accepts_aes128_expansion(key: bytes) -> None:
-    encryption_round_keys: RoundKeys = expand_aes128_key(key)
+    encryption_round_keys, final_encryption_key = expand_aes128_key(key)
     decryption_round_keys: RoundKeys = build_decryption_round_keys(
-        encryption_round_keys
+        encryption_round_keys + [final_encryption_key]
     )
     assert len(decryption_round_keys) == AES_128_ROUND_COUNT + 1
-    assert decryption_round_keys[0] == encryption_round_keys[-1]
+    assert decryption_round_keys[0] == final_encryption_key
     assert decryption_round_keys[-1] == encryption_round_keys[0]
 
 
 @mark.quick
 @given(key=aes192key)
 def test_accepts_aes192_expansion(key: bytes) -> None:
-    encryption_round_keys: RoundKeys = expand_aes192_key(key)
+    encryption_round_keys, final_encryption_key = expand_aes192_key(key)
     decryption_round_keys: RoundKeys = build_decryption_round_keys(
-        encryption_round_keys
+        encryption_round_keys + [final_encryption_key]
     )
     assert len(decryption_round_keys) == AES_192_ROUND_COUNT + 1
-    assert decryption_round_keys[0] == encryption_round_keys[-1]
+    assert decryption_round_keys[0] == final_encryption_key
     assert decryption_round_keys[-1] == encryption_round_keys[0]
 
 
 @mark.quick
 @given(key=aes256key)
 def test_accepts_aes256_expansion(key: bytes) -> None:
-    encryption_round_keys: RoundKeys = expand_aes256_key(key)
+    encryption_round_keys, final_encryption_key = expand_aes256_key(key)
     decryption_round_keys: RoundKeys = build_decryption_round_keys(
-        encryption_round_keys
+        encryption_round_keys + [final_encryption_key]
     )
     assert len(decryption_round_keys) == AES_256_ROUND_COUNT + 1
-    assert decryption_round_keys[0] == encryption_round_keys[-1]
+    assert decryption_round_keys[0] == final_encryption_key
     assert decryption_round_keys[-1] == encryption_round_keys[0]
