@@ -64,10 +64,10 @@ class FastAesCore(Aes):
                 self.__final_encryption_key,
             ) = expand_aes256_key(key)
         (
-            *self.__decryption_round_keys,
+            self.__decryption_round_keys,
             self.__final_decryption_key,
         ) = build_decryption_round_keys(
-            self.__encryption_round_keys + [self.__final_encryption_key]
+            self.__encryption_round_keys, self.__final_encryption_key
         )
 
     def encrypt_block(self, plaintext: bytes) -> bytes:
