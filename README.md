@@ -16,4 +16,4 @@ This package provides four extras: `dev`, `test`, `fuzz`, and `build`. These are
 
 ## License
 
-`purepython-aes` is a free, open-source software distributed under the [MIT License](https://github.com/Pukhosos/purepython-aes/blob/main/LISENCE.txt).
+`purepython-aes` is a free, open-source software distributed under the [MIT License](https://github.com/Pukhosos/purepython-aes/blob/main/LICENSE.txt).
