@@ -17,16 +17,16 @@ class CtrMode(StreamCipherMode):
         initialization_value: bytes,
         plaintext: bytes,
     ) -> bytes:
-        return self.transform(initialization_value, plaintext)
+        return self.__transform_stream__(initialization_value, plaintext)
 
     def __decrypt_stream__(
         self,
         initialization_value: bytes,
         ciphertext: bytes,
     ) -> bytes:
-        return self.transform(initialization_value, ciphertext)
+        return self.__transform_stream__(initialization_value, ciphertext)
 
-    def transform(
+    def __transform_stream__(
         self,
         initialization_value: bytes,
         data: bytes,

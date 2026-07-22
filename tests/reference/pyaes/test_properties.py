@@ -272,8 +272,14 @@ class TestAgainstPyaes:
         ctr: CtrMode = CtrMode(algorithm_case.algorithm(key))
         initialization_value: bytes = counter.to_bytes(AES_BLOCK_SIZE, byteorder='big')
         reference_ciphertext: bytes = encrypt_ctr(key, counter, plaintext)
-        assert ctr.transform(initialization_value, plaintext) == reference_ciphertext
-        assert ctr.transform(initialization_value, reference_ciphertext) == plaintext
+        assert (
+            ctr.__transform_stream__(initialization_value, plaintext)
+            == reference_ciphertext
+        )
+        assert (
+            ctr.__transform_stream__(initialization_value, reference_ciphertext)
+            == plaintext
+        )
         assert decrypt_ctr(key, counter, reference_ciphertext) == plaintext
 
     @staticmethod
@@ -293,7 +299,7 @@ class TestAgainstPyaes:
         ctr: CtrMode = CtrMode(algorithm_case.algorithm(key))
         initialization_value: bytes = counter.to_bytes(AES_BLOCK_SIZE, byteorder='big')
         assert (
-            ctr.transform(initialization_value, plaintext)  # fmt: skip
+            ctr.__transform_stream__(initialization_value, plaintext)  # fmt: skip
             == encrypt_ctr(key, counter, plaintext)
         )
 

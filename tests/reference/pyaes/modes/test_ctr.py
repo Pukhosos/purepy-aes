@@ -60,7 +60,7 @@ class TestPyaesCtrReference:
             AES_BLOCK_SIZE,
             byteorder='big',
         )
-        assert ctr.transform(initialization_value, plaintext) == encrypt_ctr(
+        assert ctr.__transform_stream__(initialization_value, plaintext) == encrypt_ctr(
             key=algorithm_case.key,
             counter=counter,
             plaintext=plaintext,
@@ -73,7 +73,7 @@ class TestPyaesCtrReference:
             AES_BLOCK_SIZE,
             byteorder='big',
         )
-        assert ctr.transform(
+        assert ctr.__transform_stream__(
             initialization_value=initialization_value,
             data=COUNTER_ROLLOVER_PLAINTEXT,
         ) == encrypt_ctr(
