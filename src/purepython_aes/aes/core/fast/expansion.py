@@ -46,7 +46,7 @@ def expand_aes128_key(key: bytes) -> tuple[RoundKeys, RoundKey]:
         | (sbox[(word_3 >> 8) & 0xFF] << 16)
         | (sbox[word_3 & 0xFF] << 8)
         | sbox[(word_3 >> 24) & 0xFF]
-    ) ^ round_constant_words[AES_128_ROUND_COUNT]
+    ) ^ 0x36000000
     word_0 ^= transformed_word
     word_1 ^= word_0
     word_2 ^= word_1
@@ -104,7 +104,7 @@ def expand_aes192_key(key: bytes) -> tuple[RoundKeys, RoundKey]:
         | (sbox[(source_word_5 >> 8) & 0xFF] << 16)
         | (sbox[source_word_5 & 0xFF] << 8)
         | sbox[(source_word_5 >> 24) & 0xFF]
-    ) ^ round_constant_words[AES_192_EXPANSION_COUNT]
+    ) ^ 0x80000000
     final_word_0: int = source_word_0 ^ final_transformed_word
     final_word_1: int = source_word_1 ^ final_word_0
     final_word_2: int = source_word_2 ^ final_word_1
@@ -172,7 +172,7 @@ def expand_aes256_key(key: bytes) -> tuple[RoundKeys, RoundKey]:
         | (sbox[(previous_word_3 >> 8) & 0xFF] << 16)
         | (sbox[previous_word_3 & 0xFF] << 8)
         | sbox[(previous_word_3 >> 24) & 0xFF]
-    ) ^ round_constant_words[AES_256_ROUND_COUNT >> 1]
+    ) ^ 0x40000000
     next_word_0 = source_word_0 ^ transformed_word
     next_word_1 = source_word_1 ^ next_word_0
     next_word_2 = source_word_2 ^ next_word_1
