@@ -1,23 +1,18 @@
 from struct import unpack
 from typing import Final
 
-from purepython_aes.const import AES_128_ROUND_COUNT, AES_256_ROUND_COUNT, SBOX
+from purepython_aes.const import (
+    AES_128_ROUND_COUNT,
+    AES_256_ROUND_COUNT,
+    ROUND_CONSTANTS,
+    SBOX,
+)
 from purepython_aes.types import IntLookupTable256, RoundKey, RoundKeys
 
 AES_192_EXPANSION_COUNT: Final[int] = 8
 
-ROUND_CONSTANT_WORDS: Final[tuple[int, ...]] = (
-    0x00000000,
-    0x01000000,
-    0x02000000,
-    0x04000000,
-    0x08000000,
-    0x10000000,
-    0x20000000,
-    0x40000000,
-    0x80000000,
-    0x1B000000,
-    0x36000000,
+ROUND_CONSTANT_WORDS: Final[tuple[int, ...]] = tuple(
+    round_constant << 24 for round_constant in ROUND_CONSTANTS
 )
 
 
