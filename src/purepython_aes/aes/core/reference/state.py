@@ -7,8 +7,8 @@ from purepython_aes.aes.core.reference.operations import inverse_mix_column, mix
 from purepython_aes.const import AES_BLOCK_SIZE, INVERSE_SBOX, SBOX
 
 
-@dataclass(slots=True)
 @final
+@dataclass(slots=True)
 class AesState:
     __constructor_key: ClassVar[object] = object()
     __b: list[int]
